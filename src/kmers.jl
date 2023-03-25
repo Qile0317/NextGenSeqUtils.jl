@@ -13,15 +13,16 @@ and value in each bin corresponding to number of occurences of that kmer within 
 """
 function kmer_count(str::String, k::Int)
     # TODO: could directly encode `str` as 2-bit BioSequence
-    bins = zeros(eltype(KmerType), 4^k)
-
+  
     mask = unsigned(4^k - 1)  # all ones
+    bins = zeros(eltype(KmerType), mask + 1)
     kmer = unsigned(0)
-    for c in str[1:k-1]
-        kmer = (kmer << 2) + NUCLEOTIDE_BITS[c]
+  
+    for c in view(str, 1:k-1)
+        kmer = (kmer << 2) | NUCLEOTIDE_BITS[c]
     end
-    for c in str[k:end]
-        kmer = ((kmer << 2) & mask) + NUCLEOTIDE_BITS[c]
+    for c in view(str, k:length(str))
+        kmer = ((kmer << 2) & mask) | NUCLEOTIDE_BITS[c]
         bins[kmer + 1] += 1
     end
     return bins
