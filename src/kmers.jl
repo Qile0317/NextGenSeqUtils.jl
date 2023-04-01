@@ -16,14 +16,14 @@ function kmer_count(str::String, k::Int)
   
     mask = unsigned(4^k - 1)  # all ones
     bins = zeros(eltype(KmerType), mask + 1)
-    kmer = unsigned(0)
-  
-    for c in view(str, 1:k-1)
-        kmer = (kmer << 2) | NUCLEOTIDE_BITS[c]
+    
+    # initialize kmer
+    kmer = unsigned(0); for i in 1:k-1
+        @inbounds kmer = (kmer << 2) | NUCLEOTIDE_BITS[str[i]]
     end
-    for c in view(str, k:length(str))
-        kmer = ((kmer << 2) & mask) | NUCLEOTIDE_BITS[c]
-        bins[kmer + 1] += 1
+    for i in k:sizeof(str)
+        @inbounds kmer = ((kmer << 2) & mask) | NUCLEOTIDE_BITS[str[i]]
+        @inbounds bins[kmer + 1] += 1
     end
     return bins
 end
